@@ -1,0 +1,37 @@
+package com.azarel.balances.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "Cuentas")
+@Data
+public class CuentaModel {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "numerocuenta")
+    private Integer numeroCuenta;
+
+    @Column(name = "idcliente", nullable = false)
+    private Integer idCliente;
+
+    @ManyToOne
+    @JoinColumn(name = "idtipocuenta", nullable = false)
+    private TipoCuentaModel tipoCuenta;
+
+    @Column(name = "saldoinicial", precision = 15, scale = 2)
+    private BigDecimal saldoInicial;
+
+    @Column(name = "saldodisponible", precision = 15, scale = 2)
+    private BigDecimal saldoDisponible;
+
+    @Column(length = 20)
+    private String estado;
+
+    private LocalDateTime creado;
+}
+
