@@ -60,11 +60,7 @@
 		    <artifactId>lombok</artifactId>
 		    <scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.azarel.client</groupId>
-			<artifactId>project.client</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		
 	</dependencies>
 
 	<build>

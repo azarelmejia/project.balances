@@ -20,15 +20,12 @@ public class TransaccionModel {
     @ManyToOne
     @JoinColumn(name = "numerocuenta", nullable = false)
     private CuentaModel cuenta;
-
-    @Column(name = "tipotransaccion", length = 50, nullable = false)
-    private String tipoTransaccion;
-
+    
     @Column(name = "monto", precision = 15, scale = 2, nullable = false)
     private BigDecimal monto;
 
-    @Column(name = "saldo", precision = 15, scale = 2, nullable = false)
-    private BigDecimal saldo;
+    @Column(name = "tipotransaccion", length = 50, nullable = false)
+    private String tipoTransaccion;
 
     @ManyToOne
     @JoinColumn(name = "idestadotransaccion", nullable = false)
@@ -37,5 +34,15 @@ public class TransaccionModel {
     private LocalDate fecha;
 
     private LocalDateTime creado;
+    
+    @Column(name = "numerocuenta", nullable = false)
+    private Integer numeroCuenta;
+    
+    @Column(name = "idestadotransaccion", nullable = false)
+    private Integer idEstadoTransaccion;
+    
+    @Column(name = "descripciontrx", nullable = false)
+    private String descripciontrx;
+    
 }
 

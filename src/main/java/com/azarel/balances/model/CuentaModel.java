@@ -1,6 +1,7 @@
 package com.azarel.balances.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,10 +10,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Cuentas")
 @Data
+@Builder
 public class CuentaModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "numerocuenta")
     private Integer numeroCuenta;
 
