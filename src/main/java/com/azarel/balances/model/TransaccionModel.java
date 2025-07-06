@@ -18,11 +18,14 @@ public class TransaccionModel {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "numerocuenta", nullable = false)
+    @JoinColumn(name = "numerocuenta", referencedColumnName = "numeroCuenta", nullable = false)
     private CuentaModel cuenta;
     
     @Column(name = "monto", precision = 15, scale = 2, nullable = false)
     private BigDecimal monto;
+    
+    @Column(name = "saldo", precision = 15, scale = 2, nullable = false)
+    private BigDecimal saldo;
 
     @Column(name = "tipotransaccion", length = 50, nullable = false)
     private String tipoTransaccion;
@@ -35,11 +38,13 @@ public class TransaccionModel {
 
     private LocalDateTime creado;
     
-    @Column(name = "numerocuenta", nullable = false)
-    private Integer numeroCuenta;
+    //@Column(name = "numerocuenta", nullable = false)
+    @Transient
+    private Integer numCuenta;
     
-    @Column(name = "idestadotransaccion", nullable = false)
-    private Integer idEstadoTransaccion;
+    //@Column(name = "idestadotransaccion", nullable = false)
+    @Transient
+    private Integer estadoTransaccionid;
     
     @Column(name = "descripciontrx", nullable = false)
     private String descripciontrx;

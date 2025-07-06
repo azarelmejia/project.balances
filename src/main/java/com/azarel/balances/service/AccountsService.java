@@ -1,6 +1,7 @@
 package com.azarel.balances.service;
 
 import com.azarel.balances.model.CuentaModel;
+import com.azarel.balances.model.EstadoTransaccionModel;
 import com.azarel.balances.model.ResponseModel;
 import com.azarel.balances.model.TransaccionModel;
 import com.azarel.balances.model.TransaccionesCuentasDTO;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,19 +75,31 @@ public CuentaModel actualizarSaldoCuenta(CuentaModel cuenta) {
      */
     public ResponseModel guardarTransaccion(TransaccionModel transaccion) {
     	
-    	if(transaccionRepository.existsById(transaccion.getNumeroCuenta())) {
+    	Optional<CuentaModel> estadoCuenta = cuentaRepository.findAll()
+	            .stream()
+	            .filter(cuenta -> cuenta.getNumeroCuenta().equals(transaccion.getNumCuenta()))
+	            .findFirst();
+    	
+    	if(estadoCuenta.get().getNumeroCuenta() > 0) {
     		
     		/*Aqui validamos si la cuenta existe, esta activa y tiene saldo*/
     		BigDecimal vSaldo = null;
+    		BigDecimal vNuevoSaldo = null;
     		
-    		Optional<CuentaModel> estadoCuenta = cuentaRepository.findAll()
-    	            .stream()
-    	            .filter(cuenta -> cuenta.getNumeroCuenta().equals(transaccion.getNumeroCuenta()))
-    	            .findFirst();
-    		
-    		
-    		if(estadoCuenta.get().getEstado() == "Activo") {		
-    					
+    		if(estadoCuenta.get().getEstado().equals("Activo")) {
+    			/*
+    			transaccionRepository.findAll().stream()
+    			.filter(T -> T.getNumeroCuenta() == transaccion.getNumeroCuenta())
+    			.sorted(Comparator.comparing(TransaccionModel::getId).reversed())
+    			.findFirst(); */
+    			
+    			// Recuperar la ultima trx de la cuenta
+    			
+    			vSaldo = calcularSaldoDisponible(transaccion);
+    			vNuevoSaldo = nuevoSaldoDisponible(transaccion);
+    			transaccion.setSaldo(vNuevoSaldo);
+    			transaccion.setEstadoTransaccion(new EstadoTransaccionModel());
+    			transaccion.getEstadoTransaccion().setId(1);
     			switch (transaccion.getTipoTransaccion()) {
     			case "Deposito": 
     				
@@ -108,61 +122,69 @@ public CuentaModel actualizarSaldoCuenta(CuentaModel cuenta) {
     				throw new IllegalArgumentException("Tipo de transaccion invalida: " + transaccion.getTipoTransaccion());
     			
     			}
+    			response.setStatus("success");
+    			response.setMsg("Transaccion exitosa");
     			
-    			vSaldo = calcularSaldoDisponible(transaccion);
-    			CuentaModel actualizarSaldo = CuentaModel.builder()
-    				    //.numeroCuenta(transaccion.getNumeroCuenta()) 
+    			/*CuentaModel actualizarSaldo = CuentaModel.builder()
+    				    .numeroCuenta(transaccion.getNumCuenta()) 
     				    .idCliente(transaccion.getId())
     				    .saldoDisponible(vSaldo)
     				    //.estado("Activo")
-    				    .build();
+    				    .build(); */
     			
-    			actualizarSaldoCuenta(actualizarSaldo);
+    			estadoCuenta.get().setSaldoDisponible(vSaldo);
     			
-        		
+    			var saldoActualizado = actualizarSaldoCuenta(estadoCuenta.orElse(null));
+    			if(saldoActualizado.getSaldoDisponible().equals(vSaldo)) response.setMsg("Transaccion exitosa | Saldo actualizado");
     			
     		} else {
     			response.setStatus("warning");
                 response.setMsg("Cuenta inactiva");
     		}
     		
-    		
-    		
-    		
-    		
-    		
-    		response.setStatus("success");
-            response.setMsg("Datos obtenidos correctamente");
-            response.setData(null);
     	} else {
     		response.setStatus("warning");
             response.setMsg("Cuenta no existe");
     	}
-    	
-    	
         return response;
     }
     
     
     private BigDecimal existeSaldoDisponible(TransaccionModel data) {
     	
-    	Optional<CuentaModel> cm = obtenerCuentaPorNumero(data.getNumeroCuenta());
+    	Optional<CuentaModel> cm = obtenerCuentaPorNumero(data.getNumCuenta());
     	
     	return cm.get().getSaldoDisponible().subtract(data.getMonto());
     }
     
     private BigDecimal calcularSaldoDisponible(TransaccionModel data) {
     	
-    	Optional<CuentaModel> cm = obtenerCuentaPorNumero(data.getNumeroCuenta());
+    	Optional<CuentaModel> cm = obtenerCuentaPorNumero(data.getNumCuenta());
     	BigDecimal Disponible = null;
     	if ("Deposito".equals(data.getTipoTransaccion())) {
     		Disponible = cm.get().getSaldoDisponible().add(data.getMonto());
     	} else {
     		Disponible = cm.get().getSaldoDisponible().subtract(data.getMonto());
     	}
-    	
-    	
     	return Disponible;
+    }
+    
+    private BigDecimal nuevoSaldoDisponible(TransaccionModel data) {
+    	
+    	Optional<TransaccionModel> cm = lastTrx(data.getNumCuenta());
+    	BigDecimal Disponible = null;
+    	if ("Deposito".equals(data.getTipoTransaccion())) {
+    		Disponible = cm.get().getSaldo().add(data.getMonto());
+    	} else {
+    		Disponible = cm.get().getSaldo().subtract(data.getMonto());
+    	}
+    	return Disponible;
+    }
+    
+    
+    public Optional<TransaccionModel> lastTrx(Integer numeroCuenta){
+    	Optional<TransaccionModel> lastreg = transaccionRepository.ultimaTransaccionByCuenta(numeroCuenta);
+    	return lastreg;
     }
     
 

@@ -29,6 +29,32 @@ public class AccountsController {
         System.out.println(">>> AccountsController inicializado correctamente <<<");
     }
     
+    @PostMapping("/crear")
+    public ResponseModel crearcuenta(@RequestBody CuentaModel cliente) {
+
+        ResponseModel response = new ResponseModel();
+
+        try {
+        	CuentaModel cuenta = accountsService.crearCuenta(cliente);
+            
+            if(cuenta.getIdCliente() > 0) {
+            	response.setStatus("success");
+                response.setMsg("Cuenta Creada: " + cuenta.getNumeroCuenta());
+                response.setData(cuenta);
+            }
+            
+
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMsg("Ocurrió un error al guardar los datos: " + e.getMessage());
+            response.setData(null);
+            
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+    
 
     @GetMapping("/movimientos")
     public ResponseModel obtenerTransacciones(
@@ -59,31 +85,6 @@ public class AccountsController {
         return response;
     }
     
-    @PostMapping("/crear")
-    public ResponseModel crearcuenta(@RequestBody CuentaModel cliente) {
-
-        ResponseModel response = new ResponseModel();
-
-        try {
-        	CuentaModel cuenta = accountsService.crearCuenta(cliente);
-            
-            if(cuenta.getIdCliente() > 0) {
-            	response.setStatus("success");
-                response.setMsg("Cuenta Creada: " + cuenta.getNumeroCuenta());
-                response.setData(cuenta);
-            }
-            
-
-        } catch (Exception e) {
-            response.setStatus("error");
-            response.setMsg("Ocurrió un error al guardar los datos: " + e.getMessage());
-            response.setData(null);
-            
-            e.printStackTrace();
-        }
-
-        return response;
-    }
     
     @PostMapping("/creartrx")
     public ResponseModel creartrx(@RequestBody TransaccionModel trx) {
@@ -91,12 +92,12 @@ public class AccountsController {
         ResponseModel response = new ResponseModel();
 
         try {
-        	CuentaModel cuenta = accountsService.crearCuenta(trx);
+        	response = accountsService.guardarTransaccion(trx);
             
-            if(cuenta.getIdCliente() > 0) {
+            if(response.getStatus().equals("success")) {
             	response.setStatus("success");
-                response.setMsg("Cuenta Creada: " + cuenta.getNumeroCuenta());
-                response.setData(cuenta);
+                response.setMsg("Transaccion Completada: ");
+                
             }
             
 
