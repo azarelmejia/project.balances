@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResponseModel {
-    private String status = "Warning";     // Ej: "success", "error"
-    private String msg = "Problema en la peticion con la Data";        // Mensaje para el servicio
-    private Object data =  null;       // Puede ser cualquier tipo de objeto
+    private String status = "Warning";     
+    private String msg = "Problema en la peticion con la Data";       
+    private Object data =  null;      
 }
 

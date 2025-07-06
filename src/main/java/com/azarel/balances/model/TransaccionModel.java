@@ -38,7 +38,7 @@ public class TransaccionModel {
 
     private LocalDateTime creado;
     
-    //@Column(name = "numerocuenta", nullable = false)
+    //@Column(name = "numerocuenta", nullable = false)$
     @Transient
     private Integer numCuenta;
     

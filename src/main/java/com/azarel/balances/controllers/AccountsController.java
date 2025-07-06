@@ -54,8 +54,36 @@ public class AccountsController {
 
         return response;
     }
+   
     
+    
+    @PostMapping("/creartrx")
+    public ResponseModel creartrx(@RequestBody TransaccionModel trx) {
 
+        ResponseModel response = new ResponseModel();
+
+        try {
+        	response = accountsService.guardarTransaccion(trx);
+            
+            if(response.getStatus().equals("success")) {
+            	response.setStatus("success");
+                response.setMsg("Transaccion Completada: ");
+                
+            }
+            
+
+        } catch (Exception e) {
+            response.setStatus("error");
+            response.setMsg("Ocurrió un error al guardar los datos: " + e.getMessage());
+            response.setData(null);
+            
+            e.printStackTrace();
+        }
+
+        return response;
+    }
+    
+    
     @GetMapping("/movimientos")
     public ResponseModel obtenerTransacciones(
             @RequestParam("fechaInicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
@@ -77,33 +105,6 @@ public class AccountsController {
         } catch (Exception e) {
             response.setStatus("error");
             response.setMsg("Ocurrió un error al obtener los datos: " + e.getMessage());
-            response.setData(null);
-            
-            e.printStackTrace();
-        }
-
-        return response;
-    }
-    
-    
-    @PostMapping("/creartrx")
-    public ResponseModel creartrx(@RequestBody TransaccionModel trx) {
-
-        ResponseModel response = new ResponseModel();
-
-        try {
-        	response = accountsService.guardarTransaccion(trx);
-            
-            if(response.getStatus().equals("success")) {
-            	response.setStatus("success");
-                response.setMsg("Transaccion Completada: ");
-                
-            }
-            
-
-        } catch (Exception e) {
-            response.setStatus("error");
-            response.setMsg("Ocurrió un error al guardar los datos: " + e.getMessage());
             response.setData(null);
             
             e.printStackTrace();

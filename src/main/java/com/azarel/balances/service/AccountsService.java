@@ -96,7 +96,7 @@ public CuentaModel actualizarSaldoCuenta(CuentaModel cuenta) {
     			// Recuperar la ultima trx de la cuenta
     			
     			vSaldo = calcularSaldoDisponible(transaccion);
-    			vNuevoSaldo = nuevoSaldoDisponible(transaccion);
+    			vNuevoSaldo = (!nuevoSaldoDisponible(transaccion).equals(null)) ? nuevoSaldoDisponible(transaccion) : vSaldo;
     			transaccion.setSaldo(vNuevoSaldo);
     			transaccion.setEstadoTransaccion(new EstadoTransaccionModel());
     			transaccion.getEstadoTransaccion().setId(1);
@@ -104,13 +104,16 @@ public CuentaModel actualizarSaldoCuenta(CuentaModel cuenta) {
     			case "Deposito": 
     				
     				transaccionRepository.save(transaccion);
+    				response.setStatus("success");
+        			response.setMsg("Transaccion exitosa");
     				
     			break;
     			case "Retiro":
     				
     				if(existeSaldoDisponible(transaccion).compareTo(BigDecimal.ZERO) > 0) {
     					transaccionRepository.save(transaccion);
-    					
+    					response.setStatus("success");
+    	    			response.setMsg("Transaccion exitosa");
     					
     				} else {
     					response.setStatus("warning");
@@ -122,8 +125,7 @@ public CuentaModel actualizarSaldoCuenta(CuentaModel cuenta) {
     				throw new IllegalArgumentException("Tipo de transaccion invalida: " + transaccion.getTipoTransaccion());
     			
     			}
-    			response.setStatus("success");
-    			response.setMsg("Transaccion exitosa");
+    			
     			
     			/*CuentaModel actualizarSaldo = CuentaModel.builder()
     				    .numeroCuenta(transaccion.getNumCuenta()) 
@@ -131,11 +133,16 @@ public CuentaModel actualizarSaldoCuenta(CuentaModel cuenta) {
     				    .saldoDisponible(vSaldo)
     				    //.estado("Activo")
     				    .build(); */
+    			if(response.getStatus().equals("success")) {
+    				
+    				estadoCuenta.get().setSaldoDisponible(vSaldo);
+        			
+        			var saldoActualizado = actualizarSaldoCuenta(estadoCuenta.orElse(null));
+        			if(saldoActualizado.getSaldoDisponible().equals(vSaldo)) 
+        				response.setMsg("Transaccion exitosa | Saldo actualizado");
+    				
+    			}
     			
-    			estadoCuenta.get().setSaldoDisponible(vSaldo);
-    			
-    			var saldoActualizado = actualizarSaldoCuenta(estadoCuenta.orElse(null));
-    			if(saldoActualizado.getSaldoDisponible().equals(vSaldo)) response.setMsg("Transaccion exitosa | Saldo actualizado");
     			
     		} else {
     			response.setStatus("warning");
@@ -172,11 +179,13 @@ public CuentaModel actualizarSaldoCuenta(CuentaModel cuenta) {
     private BigDecimal nuevoSaldoDisponible(TransaccionModel data) {
     	
     	Optional<TransaccionModel> cm = lastTrx(data.getNumCuenta());
-    	BigDecimal Disponible = null;
-    	if ("Deposito".equals(data.getTipoTransaccion())) {
-    		Disponible = cm.get().getSaldo().add(data.getMonto());
-    	} else {
-    		Disponible = cm.get().getSaldo().subtract(data.getMonto());
+    	BigDecimal Disponible = BigDecimal.ZERO;
+    	if(cm.isPresent()) {
+	    	if ("Deposito".equals(data.getTipoTransaccion())) {
+	    		Disponible = cm.get().getSaldo().add(data.getMonto());
+	    	} else {
+	    		Disponible = cm.get().getSaldo().subtract(data.getMonto());
+	    	}
     	}
     	return Disponible;
     }
